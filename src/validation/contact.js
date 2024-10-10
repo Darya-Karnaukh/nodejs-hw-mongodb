@@ -16,6 +16,7 @@ export const createContactSchema = Joi.object({
   isFavourite: Joi.boolean(),
   contactType: Joi.string()
     .valid('work', 'home', 'personal')
+    .default('personal')
     .required()
     .messages({
       'any.required': 'Contact type is required',

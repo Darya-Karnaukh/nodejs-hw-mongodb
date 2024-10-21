@@ -54,10 +54,18 @@ export const createContactController = async (req, res) => {
   let photoUrl;
 
   if (photo) {
-    if (env('ENABLE_CLOUDINARY') === 'true') {
-      photoUrl = await saveFileToCloudinary(photo);
-    } else {
-      photoUrl = await saveFileToUploadDir(photo);
+    try {
+      if (env('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(photo);
+      } else {
+        photoUrl = await saveFileToUploadDir(photo);
+      }
+    } catch (err) {
+      return res.status(500).json({
+        status: 500,
+        message: 'File upload failed',
+        error: err.message,
+      });
     }
   }
 
@@ -70,12 +78,20 @@ export const createContactController = async (req, res) => {
 
   const contactData = { ...req.body, userId: req.user._id, photo: photoUrl };
 
-  const contact = await createContact(contactData);
-  res.status(201).json({
-    status: 201,
-    message: 'Successfully created a contact!',
-    data: contact,
-  });
+  try {
+    const contact = await createContact(contactData);
+    res.status(201).json({
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: contact,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: 'Error creating contact',
+      error: error.message,
+    });
+  }
 };
 
 export const patchContactController = async (req, res, next) => {
@@ -92,18 +108,22 @@ export const patchContactController = async (req, res, next) => {
       photoUrl = await saveFileToUploadDir(photo);
     }
   }
-
-  const result = await updateContact(contactId, req.body, userId, {
-    photo: photoUrl,
-  });
+  const result = await updateContact(
+    contactId,
+    { ...req.body, photo: photoUrl },
+    userId,
+  );
 
   if (!result) {
-    return next(createHttpError(404, 'Contact not found'));
+    next(createHttpError(404, 'Contact not found'));
+    return;
   }
+
   const status = result.isNew ? 201 : 200;
+
   res.status(status).json({
     status,
-    message: `Successfully updated a contact!`,
+    message: 'Successfully updated a contact!',
     data: result.contact,
   });
 };

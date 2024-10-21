@@ -11,7 +11,6 @@ import { UPLOAD_DIR } from './constants/index.js';
 const PORT = Number(env('PORT'));
 export const setupServer = () => {
   const app = express();
-  app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use(express.json());
   app.use(cors());
@@ -30,6 +29,7 @@ export const setupServer = () => {
       message: 'Hello world!',
     });
   });
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
   app.use(router);
 

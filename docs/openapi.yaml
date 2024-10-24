@@ -11,7 +11,7 @@ tags:
     description: Operations about users.
 servers:
   - url: http://localhost:3068
-  - url: https://your-deployment-url.com
+  - url: https://nodejs-hw-u9p9.onrender.com
 paths:
   /contacts:
     post:

@@ -15,6 +15,10 @@ import { sendMail } from '../utils/sendMail.js';
 import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import {
+  getFullNameFromGoogleTokenPayload,
+  validateCode,
+} from '../utils/googleOAuth2.js';
 
 const createSession = () => {
   const accessToken = randomBytes(30).toString('base64');
@@ -158,4 +162,28 @@ export const resetPassword = async (payload) => {
 
   await User.updateOne({ _id: user._id }, { password: encryptedPassword });
   await Session.deleteMany({ userId: user._id });
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+  const loginTicket = await validateCode(code);
+  const payload = loginTicket.getPayload();
+  if (!payload) throw createHttpError(401);
+
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    const password = await bcrypt.hash(randomBytes(10), 10);
+    user = await User.create({
+      email: payload.email,
+      name: getFullNameFromGoogleTokenPayload(payload),
+      password,
+      role: 'parent',
+    });
+  }
+
+  const newSession = createSession();
+
+  return await Session.create({
+    userId: user._id,
+    ...newSession,
+  });
 };

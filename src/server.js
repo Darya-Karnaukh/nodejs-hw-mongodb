@@ -16,7 +16,7 @@ export const setupServer = () => {
 
   app.use(express.json());
   const allowedOrigins = [
-    'http://localhost:3000',
+    'http://localhost:5173',
     'https://your-react-app-url.com',
   ];
   app.use(

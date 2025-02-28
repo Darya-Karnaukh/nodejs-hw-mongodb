@@ -44,7 +44,6 @@ export const loginUserController = async (req, res) => {
     message: 'Successfully logged in an user!',
     data: {
       accessToken: session.accessToken,
-      name: session.user.name,
     },
   });
 };

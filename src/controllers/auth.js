@@ -1,4 +1,5 @@
 import { REFRESH_TOKEN_TIME } from '../constants/index.js';
+
 import {
   loginOrSignupWithGoogle,
   loginUser,
@@ -9,6 +10,7 @@ import {
   resetPassword,
 } from '../services/auth.js';
 import { generateAuthUrl } from '../utils/googleOAuthClient.js';
+import { User } from '../db/models/user.js';
 
 const setupSession = (res, session) => {
   res.cookie('refreshToken', session.refreshToken, {
@@ -36,7 +38,7 @@ export const registerUserController = async (req, res) => {
 
 export const loginUserController = async (req, res) => {
   const session = await loginUser(req.body);
-
+  const user = await User.findById(session.userId);
   setupSession(res, session);
 
   res.json({
@@ -44,9 +46,26 @@ export const loginUserController = async (req, res) => {
     message: 'Successfully logged in an user!',
     data: {
       accessToken: session.accessToken,
+      user: { name: user.name, email: user.email },
     },
   });
 };
+
+// export const getCurrentController = async (req, res) => {
+//  const session = await Session.findOne({_id: req.cookies.sessionId});
+//  if(!session) {
+//   throw createHttpError(401, "Session not found");
+//  }
+
+//  const user = await User.findById(session.userId);
+//   if (!user) throw createHttpError(404, "User not found");
+
+//  res.json({
+//   status:200,
+//   message: "Current user retrieved",
+//   data: {name: user.name, email: user.email }
+//  });
+// };
 
 export const logoutUserController = async (req, res) => {
   if (req.cookies.sessionId) {

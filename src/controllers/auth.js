@@ -51,22 +51,6 @@ export const loginUserController = async (req, res) => {
   });
 };
 
-// export const getCurrentController = async (req, res) => {
-//  const session = await Session.findOne({_id: req.cookies.sessionId});
-//  if(!session) {
-//   throw createHttpError(401, "Session not found");
-//  }
-
-//  const user = await User.findById(session.userId);
-//   if (!user) throw createHttpError(404, "User not found");
-
-//  res.json({
-//   status:200,
-//   message: "Current user retrieved",
-//   data: {name: user.name, email: user.email }
-//  });
-// };
-
 export const logoutUserController = async (req, res) => {
   if (req.cookies.sessionId) {
     await logoutUser(req.cookies.sessionId);

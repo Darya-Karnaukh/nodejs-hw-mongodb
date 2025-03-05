@@ -67,6 +67,7 @@ export const logoutUserController = async (req, res) => {
 };
 
 export const refreshUserSessionController = async (req, res) => {
+  const user = await User.findById(session.userId);
   const session = await refreshUsersSession({
     sessionId: req.cookies.sessionId,
     refreshToken: req.cookies.refreshToken,
@@ -79,6 +80,7 @@ export const refreshUserSessionController = async (req, res) => {
     message: 'Successfully refreshed a session!',
     data: {
       accessToken: session.accessToken,
+      user: { name: user.name, email: user.email },
     },
   });
 };
